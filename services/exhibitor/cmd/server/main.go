@@ -62,7 +62,7 @@ func main() {
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "3000"
+		port = "8000"
 	}
 	log.Fatal(app.Listen(":" + port))
 }

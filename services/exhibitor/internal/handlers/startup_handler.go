@@ -51,12 +51,12 @@ func (h *StartupHandler) CheckStartupByDPIITCertNumber(c *fiber.Ctx) error {
 // RegisterStartup handles POST /api/startup/register
 func (h *StartupHandler) RegisterStartup(c *fiber.Ctx) error {
 	// Extract Clerk ID from context (assuming Clerk authentication)
-	clerkIDValue := c.Locals("clerk_id")
-	clerkID, ok := clerkIDValue.(string)
-	if !ok || clerkID == "" {
-		log.Println("RegisterStartup: missing or invalid Clerk ID")
-		return fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
-	}
+	// clerkIDValue := c.Locals("clerk_id")
+	// clerkID, ok := clerkIDValue.(string)
+	// if !ok || clerkID == "" {
+	// 	log.Println("RegisterStartup: missing or invalid Clerk ID")
+	// 	return fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
+	// }
 
 	// Parse request body
 	var startup model.Startup
@@ -65,18 +65,74 @@ func (h *StartupHandler) RegisterStartup(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	// Validate required fields
-	startup.Name = sanitizeString(startup.Name)
-	if startup.Name == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "Name is required")
+	var address model.Address
+	if err := c.BodyParser(&address); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
-	startup.DPIITCertNumber = sanitizeString(startup.DPIITCertNumber)
-	if startup.DPIITCertNumber == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "DPIIT certificate number is required")
+	if err := h.startupService.CreateAddress(&address); err != nil {
+		log.Printf("RegisterStartup: DB error while saving address: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create startup")
 	}
-	startup.PitchDeckURL = sanitizeString(startup.PitchDeckURL)
-	if startup.PitchDeckURL == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "Pitch deck URL is required")
+
+	var director model.Director
+	if err := c.BodyParser(&director); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+	if err := h.startupService.CreateDirector(&director); err != nil {
+		log.Printf("RegisterStartup: DB error while saving director: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create startup")
+	}
+
+	var eventIntent model.EventIntent
+	if err := c.BodyParser(&eventIntent); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+	if err := h.startupService.CreateEventIntent(&eventIntent); err != nil {
+		log.Printf("RegisterStartup: DB error while saving eventIntent: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create eventIntent")
+	}
+
+	var fundingInfo model.FundingInfo
+	if err := c.BodyParser(&fundingInfo); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+	if err := h.startupService.CreateFundingInfo(&fundingInfo); err != nil {
+		log.Printf("RegisterStartup: DB error while saving fundingInfo: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create fundingInfo")
+	}
+
+	var revenueInfo model.RevenueInfo
+	if err := c.BodyParser(&revenueInfo); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+	if err := h.startupService.CreateRevenueInfo(&revenueInfo); err != nil {
+		log.Printf("RegisterStartup: DB error while saving revenueInfo: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create revenueInfo")
+	}
+
+	var spoc model.SPOC
+	if err := c.BodyParser(&spoc); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+	if err := h.startupService.CreateSPOC(&spoc); err != nil {
+		log.Printf("RegisterStartup: DB error while saving spoc: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create spoc")
+	}
+
+	var product model.Product
+	if err := c.BodyParser(&product); err != nil {
+		log.Printf("RegisterStartup: body parse error: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
+	}
+	if err := h.startupService.CreateProduct(&product); err != nil {
+		log.Printf("RegisterStartup: DB error while saving product: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create Product")
 	}
 
 	// Check if startup already exists by DPIITCertNumber
@@ -92,6 +148,15 @@ func (h *StartupHandler) RegisterStartup(c *fiber.Ctx) error {
 	}
 
 	// Save startup
+	startup.FundingInfoID = fundingInfo.ID
+	startup.AddressID = address.ID
+	startup.DirectorID = director.ID
+	startup.EventIntentID = eventIntent.ID
+	startup.FundingInfoID = fundingInfo.ID
+	startup.RevenueInfoID = revenueInfo.ID
+	startup.ProductID = product.ID
+	startup.SPOCID = spoc.ID
+
 	if err := h.startupService.CreateStartup(&startup); err != nil {
 		log.Printf("RegisterStartup: DB error while registering startup: %v", err)
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create startup")
