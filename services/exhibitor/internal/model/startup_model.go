@@ -7,21 +7,26 @@ type Startup struct {
 	Name            string `gorm:"not null"`
 	WebsiteURL      string
 	DPIITCertNumber string `gorm:"not null;uniqueIndex"`
-	AddressID       uint
-	Address         Address
-	ProductID       uint
-	Product         Product
-	RevenueInfoID   uint
-	RevenueInfo     RevenueInfo
-	FundingInfoID   uint
-	FundingInfo     FundingInfo
-	EventIntentID   uint
-	EventIntent     EventIntent
-	PitchDeckURL    string `gorm:"not null"` // Assuming it's uploaded to cloud
-	SPOCID          uint
-	SPOC            SPOC
-	DirectorID      uint
-	Director        Director
+
+	AddressID     uint
+	Address       Address
+	ProductID     uint
+	Product       Product
+	RevenueInfoID uint
+	RevenueInfo   RevenueInfo
+	FundingInfoID uint
+	FundingInfo   FundingInfo
+	EventIntentID uint
+	EventIntent   EventIntent
+	PitchDeckURL  string `gorm:"not null"` // S3/Cloud URL
+
+	LogoURL   string `gorm:"not null"` // Add this
+	BannerURL string // Optional
+
+	SPOCID     uint
+	SPOC       SPOC
+	DirectorID uint
+	Director   Director
 }
 
 type Address struct {
@@ -34,10 +39,25 @@ type Address struct {
 
 type Product struct {
 	gorm.Model
+	Title       string      `gorm:"not null"`
 	Description string      `gorm:"type:text;not null"`
 	Problem     string      `gorm:"type:text;not null"`
-	Stage       string      `gorm:"not null"` // ENUM-like validation at API layer
+	Stage       string      `gorm:"not null"` // Enum-like
 	Users       []*UserType `gorm:"many2many:product_users;"`
+
+	Price       float64 `gorm:"not null"`  // INR
+	Quantity    int     `gorm:"not null"`  // Stock
+	Category    string  `gorm:"not null"`  // Eg: Health, EduTech
+	Tags        string  `gorm:"type:text"` // Comma-separated tags: "AI,ML,Health"
+	ProductType string  `gorm:"not null"`  // Enum: Physical, Digital, Service
+
+	Images []ProductImage `gorm:"foreignKey:ProductID"`
+}
+
+type ProductImage struct {
+	gorm.Model
+	ProductID uint   `gorm:"not null"`
+	URL       string `gorm:"not null"`
 }
 
 type UserType struct {
