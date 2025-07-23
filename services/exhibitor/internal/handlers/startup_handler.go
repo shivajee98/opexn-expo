@@ -4,6 +4,7 @@ import (
 	"errors"
 	"html"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -305,6 +306,37 @@ func (h *StartupHandler) DeleteStartup(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Startup deleted successfully",
 	})
+}
+
+func (h *StartupHandler) GetAllStartupsProducts(c *fiber.Ctx) error {
+	startups, err := h.startupService.GetAllStartupsProducts()
+	if err != nil {
+		log.Printf("GetAllStartupsProducts: failed to retrieve startups: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to retrieve startup products")
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"startups": startups,
+	})
+}
+
+func (h *StartupHandler) GetStartupProductByID(c *fiber.Ctx) error {
+	startupIDParam := c.Params("id")
+	startupID, err := strconv.ParseUint(startupIDParam, 10, 64)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid startup ID")
+	}
+
+	product, err := h.startupService.GetStartupProductByID(uint(startupID))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fiber.NewError(fiber.StatusNotFound, "Product not found for given startup")
+		}
+		log.Printf("GetStartupProductByID: %v", err)
+		return fiber.NewError(fiber.StatusInternalServerError, "Failed to retrieve product")
+	}
+
+	return c.Status(fiber.StatusOK).JSON(product)
 }
 
 // sanitizeString sanitizes input strings

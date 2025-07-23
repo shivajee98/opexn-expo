@@ -16,6 +16,8 @@ type StartupService interface {
 	CreateSPOC(spoc *model.SPOC) error
 	GetStartupByID(id uint) (*model.Startup, error)
 	GetAllStartups() ([]model.Startup, error)
+	GetStartupProductByID(id uint) (*model.Product, error)
+	GetAllStartupsProducts() ([]model.Startup, error)
 	UpdateStartup(startup *model.Startup) error
 	DeleteStartup(id uint) error
 }
@@ -69,6 +71,14 @@ func (s *startupService) GetStartupByID(id uint) (*model.Startup, error) {
 // GetAllStartups implements StartupService.
 func (s *startupService) GetAllStartups() ([]model.Startup, error) {
 	return s.startupRepo.GetAllStartups()
+}
+
+func (s *startupService) GetStartupProductByID(id uint) (*model.Product, error) {
+	return s.startupRepo.GetStartupProductByID(id)
+}
+
+func (s *startupService) GetAllStartupsProducts() ([]model.Startup, error) {
+	return s.startupRepo.GetAllStartupsProducts()
 }
 
 // UpdateStartup implements StartupService.

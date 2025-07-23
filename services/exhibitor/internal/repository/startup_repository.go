@@ -16,7 +16,9 @@ type StartupRepository interface {
 	CreateRevenueInfo(startup *model.RevenueInfo) error
 	CreateEventIntent(startup *model.EventIntent) error
 	GetStartupByID(id uint) (*model.Startup, error)
+	GetStartupProductByID(id uint) (*model.Product, error)
 	GetAllStartups() ([]model.Startup, error)
+	GetAllStartupsProducts() ([]model.Startup, error)
 	UpdateStartup(startup *model.Startup) error
 	DeleteStartup(id uint) error
 }
@@ -90,6 +92,30 @@ func (r *startupRepository) GetAllStartups() ([]model.Startup, error) {
 		Preload("EventIntent").
 		Preload("SPOC").
 		Preload("Director").
+		Find(&startups).Error
+	if err != nil {
+		return nil, err
+	}
+	return startups, nil
+}
+
+func (r *startupRepository) GetStartupProductByID(id uint) (*model.Product, error) {
+	var startup model.Startup
+	err := r.db.
+		Preload("Product").
+		First(&startup, id).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &startup.Product, nil
+}
+
+func (r *startupRepository) GetAllStartupsProducts() ([]model.Startup, error) {
+	var startups []model.Startup
+	err := r.db.
+		Preload("Product").
 		Find(&startups).Error
 	if err != nil {
 		return nil, err

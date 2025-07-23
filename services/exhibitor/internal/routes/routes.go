@@ -19,4 +19,10 @@ func SetupStartupRoutes(app *fiber.App, startupHandler *handlers.StartupHandler)
 	startup.Post("/register", startupHandler.RegisterStartup)
 	startup.Put("/update", startupHandler.UpdateStartup)
 	startup.Delete("/:id", startupHandler.DeleteStartup)
+
+	app.Get("/api/startup-products", startupHandler.GetAllStartupsProducts)
+
+	app.Get("/api/startup/:id/product", startupHandler.GetStartupProductByID)
+
+
 }
