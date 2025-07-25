@@ -1,98 +1,92 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
+
+// Note: Use a validation layer or GORM hooks to enforce enum constraints where needed.
 
 type Startup struct {
 	gorm.Model
-	Name            string `gorm:"not null"`
-	WebsiteURL      string
-	DPIITCertNumber string `gorm:"not null;uniqueIndex"`
+	Name            string `gorm:"not null" json:"name"`
+	WebsiteURL      string `json:"websiteURL"`
+	DPIITCertNumber string `gorm:"not null;uniqueIndex" json:"dpiitCertNumber"`
 
-	AddressID     uint
-	Address       Address
-	ProductID     uint
-	Product       Product
-	RevenueInfoID uint
-	RevenueInfo   RevenueInfo
-	FundingInfoID uint
-	FundingInfo   FundingInfo
-	EventIntentID uint
-	EventIntent   EventIntent
-	PitchDeckURL  string `gorm:"not null"` // S3/Cloud URL
+	PitchDeckURL string  `gorm:"not null" json:"pitchDeck"`
+	LogoURL      string  `gorm:"not null" json:"logo"`
+	BannerURL    *string `json:"banner,omitempty"` // optional
 
-	LogoURL   string `gorm:"not null"` // Add this
-	BannerURL string // Optional
-
-	SPOCID     uint
-	SPOC       SPOC
-	DirectorID uint
-	Director   Director
+	AddressID   uint        `json:"-"`
+	Address     Address     `gorm:"constraint:OnDelete:CASCADE" json:"address"`
+	Products    []Product   `gorm:"constraint:OnDelete:CASCADE" json:"products"`
+	RevenueInfo RevenueInfo `gorm:"constraint:OnDelete:CASCADE" json:"revenueInfo"`
+	FundingInfo FundingInfo `gorm:"constraint:OnDelete:CASCADE" json:"fundingInfo"`
+	EventIntent EventIntent `gorm:"constraint:OnDelete:CASCADE" json:"eventIntent"`
+	SPOC        SPOC        `gorm:"constraint:OnDelete:CASCADE" json:"spoc"`
+	Director    Director    `gorm:"constraint:OnDelete:CASCADE" json:"director"`
 }
 
 type Address struct {
 	gorm.Model
-	Street  string `gorm:"not null"`
-	City    string `gorm:"not null"`
-	State   string `gorm:"not null"`
-	Pincode string `gorm:"not null"`
+	Street  string `gorm:"not null" json:"street"`
+	City    string `gorm:"not null" json:"city"`
+	State   string `gorm:"not null" json:"state"`
+	Pincode string `gorm:"not null" json:"pincode"`
 }
 
 type Product struct {
 	gorm.Model
-	Title       string      `gorm:"not null"`
-	Description string      `gorm:"type:text;not null"`
-	Problem     string      `gorm:"type:text;not null"`
-	Stage       string      `gorm:"not null"` // Enum-like
-	Users       []*UserType `gorm:"many2many:product_users;"`
-
-	Price       float64 `gorm:"not null"`  // INR
-	Quantity    int     `gorm:"not null"`  // Stock
-	Category    string  `gorm:"not null"`  // Eg: Health, EduTech
-	Tags        string  `gorm:"type:text"` // Comma-separated tags: "AI,ML,Health"
-	ProductType string  `gorm:"not null"`  // Enum: Physical, Digital, Service
-
-	Images []ProductImage `gorm:"foreignKey:ProductID"`
+	StartupID   uint           `gorm:"not null" json:"-"`
+	Title       string         `gorm:"not null" json:"title"`
+	Stage       string         `gorm:"not null" json:"productStage"` // Should match productStages enum on frontend
+	Users       []*UserType    `gorm:"many2many:product_users;" json:"userTypes"`
+	Price       float64        `gorm:"not null" json:"price"`
+	Quantity    int            `gorm:"not null" json:"quantity"`
+	Category    string         `gorm:"not null" json:"category"`
+	Tags        string         `json:"tags"`                        // comma separated or as decided
+	ProductType string         `gorm:"not null" json:"productType"` // Physical, Digital, Service
+	Images      []ProductImage `gorm:"foreignKey:ProductID" json:"images"`
 }
 
 type ProductImage struct {
 	gorm.Model
-	ProductID uint   `gorm:"not null"`
-	URL       string `gorm:"not null"`
+	ProductID uint   `gorm:"not null" json:"-"`
+	URL       string `gorm:"not null" json:"url"`
 }
 
 type UserType struct {
 	gorm.Model
-	Label string `gorm:"uniqueIndex;not null"` // "Students", "Teachers", etc.
+	Label string `gorm:"uniqueIndex;not null" json:"label"` // e.g. "Students", "Teachers"
 }
 
 type RevenueInfo struct {
 	gorm.Model
-	RevenueBracket string `gorm:"not null"` // ENUM-like: ₹0–₹5L, ₹5–₹25L, etc.
-	UserImpact     int    `gorm:"not null"`
+	RevenueBracket string `gorm:"not null" json:"revenueBracket"` // Should be one of revenueBrackets enum from frontend
+	UserImpact     int    `gorm:"not null" json:"userImpact"`
 }
 
 type FundingInfo struct {
 	gorm.Model
-	Type string `gorm:"not null"` // ENUM-like: Angel, VC, Govt, None, etc.
+	Type string `gorm:"not null" json:"fundingType"` // Should be one of fundingTypes enum from frontend
 }
 
 type EventIntent struct {
 	gorm.Model
-	WhyParticipate string `gorm:"type:text;not null"`
-	Expectation    string `gorm:"type:text;not null"`
-	ConsentToPay   bool   `gorm:"not null"`
+	WhyParticipate string `gorm:"type:text;not null" json:"whyParticipate"`
+	Expectation    string `gorm:"type:text;not null" json:"expectation"`
+	ConsentToPay   bool   `gorm:"not null" json:"consentToPay"`
 }
 
 type SPOC struct {
 	gorm.Model
-	Name     string `gorm:"not null"`
-	Email    string `gorm:"not null"`
-	Phone    string `gorm:"not null;uniqueIndex"`
-	Position string `gorm:"not null"`
+	Name     string `gorm:"not null" json:"Name"` // Note uppercase to match your frontend keys, or you can unify to lowercase
+	Email    string `gorm:"not null" json:"Email"`
+	Phone    string `gorm:"not null;uniqueIndex" json:"Phone"`
+	Position string `gorm:"not null" json:"Position"`
 }
 
 type Director struct {
 	gorm.Model
-	Name  string `gorm:"not null"`
-	Email string `gorm:"not null"`
+	Name  string `gorm:"not null" json:"directorName"`
+	Email string `gorm:"not null" json:"directorEmail"`
 }

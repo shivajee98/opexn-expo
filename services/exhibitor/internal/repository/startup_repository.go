@@ -67,60 +67,55 @@ func (r *startupRepository) CreateRevenueInfo(revenueInfo *model.RevenueInfo) er
 
 // GetStartupByID retrieves a Startup by ID with all related entities
 func (r *startupRepository) GetStartupByID(id uint) (*model.Startup, error) {
-	var startup model.Startup
-	err := r.db.Preload("Address").
-		Preload("Product.Users").
-		Preload("RevenueInfo").
-		Preload("FundingInfo").
-		Preload("EventIntent").
-		Preload("SPOC").
-		Preload("Director").
-		First(&startup, id).Error
-	if err != nil {
-		return nil, err
-	}
-	return &startup, nil
+    var startup model.Startup
+    err := r.db.Preload("Address").
+        Preload("Products.Users").
+        Preload("RevenueInfo").
+        Preload("FundingInfo").
+        Preload("EventIntent").
+        Preload("SPOC").
+        Preload("Director").
+        First(&startup, id).Error
+    if err != nil {
+        return nil, err
+    }
+    return &startup, nil
 }
-
 // GetAllStartups retrieves all Startups with related entities
 func (r *startupRepository) GetAllStartups() ([]model.Startup, error) {
-	var startups []model.Startup
-	err := r.db.Preload("Address").
-		Preload("Product.Users").
-		Preload("RevenueInfo").
-		Preload("FundingInfo").
-		Preload("EventIntent").
-		Preload("SPOC").
-		Preload("Director").
-		Find(&startups).Error
-	if err != nil {
-		return nil, err
-	}
-	return startups, nil
+    var startups []model.Startup
+    err := r.db.Preload("Address").
+        Preload("Products.Users").
+        Preload("RevenueInfo").
+        Preload("FundingInfo").
+        Preload("EventIntent").
+        Preload("SPOC").
+        Preload("Director").
+        Find(&startups).Error
+    if err != nil {
+        return nil, err
+    }
+    return startups, nil
 }
 
 func (r *startupRepository) GetStartupProductByID(id uint) (*model.Product, error) {
-	var startup model.Startup
-	err := r.db.
-		Preload("Product").
-		First(&startup, id).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &startup.Product, nil
+    var product model.Product
+    err := r.db.Preload("Users").First(&product, id).Error
+    if err != nil {
+        return nil, err
+    }
+    return &product, nil
 }
 
 func (r *startupRepository) GetAllStartupsProducts() ([]model.Startup, error) {
-	var startups []model.Startup
-	err := r.db.
-		Preload("Product").
-		Find(&startups).Error
-	if err != nil {
-		return nil, err
-	}
-	return startups, nil
+    var startups []model.Startup
+    err := r.db.
+        Preload("Products").
+        Find(&startups).Error
+    if err != nil {
+        return nil, err
+    }
+    return startups, nil
 }
 
 // UpdateStartup updates a Startup and its related entities
