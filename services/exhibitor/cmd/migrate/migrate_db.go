@@ -13,29 +13,30 @@ func main() {
 	fmt.Println("Starting migration...")
 
 	cfg := config.LoadEnv()
-	println(cfg)
+	fmt.Println("Using database URL:", cfg.DatabaseURL)
 
-	dbConn, err := db.Connect("postgresql://neondb_owner:npg_bgh1NmrauZe2@ep-plain-cherry-a1l9b9gk-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+	dbConn, err := db.Connect(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// AutoMigrate creates/updates tables for all models
+	// AutoMigrate creates/updates tables for all models in correct order
 	err = dbConn.AutoMigrate(
-		&model.Startup{},
 		&model.Address{},
-		&model.Product{},
 		&model.UserType{},
 		&model.RevenueInfo{},
 		&model.FundingInfo{},
 		&model.EventIntent{},
 		&model.SPOC{},
 		&model.Director{},
+		&model.Startup{},      // ✅ before Product
+		&model.Product{},      // ✅ now safe
+		&model.ProductImage{}, // ✅ now safe
 	)
+
 	if err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}
-
 
 	fmt.Println("Migration completed successfully.")
 }
