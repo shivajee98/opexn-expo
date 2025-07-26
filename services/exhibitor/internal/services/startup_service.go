@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/shivajee98/opexn-exhibitors/internal/dto"
 	"github.com/shivajee98/opexn-exhibitors/internal/model"
 	"github.com/shivajee98/opexn-exhibitors/internal/repository"
 )
@@ -20,6 +21,7 @@ type StartupService interface {
 	GetAllStartupsProducts() ([]model.Startup, error)
 	UpdateStartup(startup *model.Startup) error
 	DeleteStartup(id uint) error
+	RegisterStartupService(payload *dto.StartupRegistrationPayload) (*model.Startup, error)
 }
 
 type startupService struct {
@@ -71,6 +73,10 @@ func (s *startupService) GetStartupByID(id uint) (*model.Startup, error) {
 // GetAllStartups implements StartupService.
 func (s *startupService) GetAllStartups() ([]model.Startup, error) {
 	return s.startupRepo.GetAllStartups()
+}
+
+func (s *startupService) RegisterStartupService(payload *dto.StartupRegistrationPayload) (*model.Startup, error) {
+	return s.startupRepo.RegisterStartup(payload)
 }
 
 func (s *startupService) GetStartupProductByID(id uint) (*model.Product, error) {
