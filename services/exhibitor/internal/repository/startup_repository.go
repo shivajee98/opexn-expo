@@ -109,6 +109,7 @@ func (r *startupRepository) GetStartupByID(id uint) (*model.Startup, error) {
 		Preload("RevenueInfo").
 		Preload("FundingInfo").
 		Preload("EventIntent").
+		Preload("Products.Images").
 		Preload("SPOC").
 		Preload("Director").
 		First(&startup, id).Error
