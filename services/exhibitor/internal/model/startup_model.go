@@ -49,25 +49,25 @@ type Product struct {
 	gorm.Model
 	StartupID   uint           `gorm:"not null" json:"-"`
 	Title       string         `gorm:"not null" json:"title"`
-	Stage       string         `gorm:"not null" json:"productStage"` // Should match productStages enum on frontend
-	Users       []*UserType    `gorm:"many2many:product_users;" json:"userTypes"`
+	Stage       string         `gorm:"not null" json:"productStage"` // enum in frontend
+	Users       []*UserType    `gorm:"many2many:product_users;constraint:OnDelete:CASCADE" json:"userTypes"`
 	Price       float64        `gorm:"not null" json:"price"`
 	Quantity    int            `gorm:"not null" json:"quantity"`
 	Category    string         `gorm:"not null" json:"category"`
-	Tags        string         `json:"tags"`                        // comma separated or as decided
+	Tags        string         `json:"tags"`                        // comma-separated
 	ProductType string         `gorm:"not null" json:"productType"` // Physical, Digital, Service
-	Images      []ProductImage `gorm:"foreignKey:ProductID" json:"images"`
+	Images      []ProductImage `gorm:"foreignKey:ProductID;references:ID;constraint:OnDelete:CASCADE" json:"images"`
 }
 
 type ProductImage struct {
 	gorm.Model
-	ProductID uint   `gorm:"not null" json:"-"`
+	ProductID uint   `gorm:"not null;index" json:"-"`
 	URL       string `gorm:"not null" json:"url"`
 }
 
 type UserType struct {
 	gorm.Model
-	Label string `gorm:"uniqueIndex;not null" json:"label"` // e.g. "Students", "Teachers"
+	Label string `gorm:"uniqueIndex;not null" json:"label"` // e.g. "Students", "Teachers"`
 }
 
 type RevenueInfo struct {

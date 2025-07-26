@@ -58,15 +58,6 @@ func (r *startupRepository) RegisterStartup(payload *dto.StartupRegistrationPayl
 		if err := tx.Create(&startup).Error; err != nil {
 			return err
 		}
-		for i := range startup.Products {
-            p := &startup.Products[i]
-            p.ID = 0 // Reset ID to let database auto-generate
-            p.StartupID = startup.ID
-            if err := tx.Create(p).Error; err != nil {
-                return err
-            }
-        }
-
 		return nil
 	})
 
@@ -146,7 +137,7 @@ func (r *startupRepository) GetAllStartups() ([]model.Startup, error) {
 
 func (r *startupRepository) GetStartupProductByID(id uint) (*model.Product, error) {
 	var product model.Product
-	err := r.db.Preload("Users").First(&product, id).Error
+	err := r.db.Preload("Users").Preload("Images").First(&product, id).Error
 	if err != nil {
 		return nil, err
 	}
