@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"github.com/shivajee98/opexn-exhibitors/internal/dto"
 	"github.com/shivajee98/opexn-exhibitors/internal/model"
 	"gorm.io/gorm"
@@ -8,14 +10,6 @@ import (
 
 // StartupRepository defines the interface for Startup CRUD operations
 type StartupRepository interface {
-	CreateStartup(startup *model.Startup) error
-	CreateAddress(startup *model.Address) error
-	CreateDirector(startup *model.Director) error
-	CreateFundingInfo(startup *model.FundingInfo) error
-	CreateSPOC(startup *model.SPOC) error
-	CreateProduct(startup *model.Product) error
-	CreateRevenueInfo(startup *model.RevenueInfo) error
-	CreateEventIntent(startup *model.EventIntent) error
 	GetStartupByID(id uint) (*model.Startup, error)
 	GetStartupProductByID(id uint) (*model.Product, error)
 	GetAllStartups() ([]model.Startup, error)
@@ -68,42 +62,10 @@ func (r *startupRepository) RegisterStartup(payload *dto.StartupRegistrationPayl
 	return &model.Startup{}, nil
 }
 
-// CreateStartup creates a new Startup and its related entities
-func (r *startupRepository) CreateStartup(startup *model.Startup) error {
-	return r.db.Create(startup).Error
-}
-
-func (r *startupRepository) CreateAddress(address *model.Address) error {
-	return r.db.Create(address).Error
-}
-
-func (r *startupRepository) CreateDirector(director *model.Director) error {
-	return r.db.Create(director).Error
-}
-
-func (r *startupRepository) CreateFundingInfo(fundingInfo *model.FundingInfo) error {
-	return r.db.Create(fundingInfo).Error
-}
-
-func (r *startupRepository) CreateEventIntent(eventIntent *model.EventIntent) error {
-	return r.db.Create(eventIntent).Error
-}
-
-func (r *startupRepository) CreateProduct(product *model.Product) error {
-	return r.db.Create(product).Error
-}
-
-func (r *startupRepository) CreateSPOC(spoc *model.SPOC) error {
-	return r.db.Create(spoc).Error
-}
-
-func (r *startupRepository) CreateRevenueInfo(revenueInfo *model.RevenueInfo) error {
-	return r.db.Create(revenueInfo).Error
-}
-
 // GetStartupByID retrieves a Startup by ID with all related entities
 func (r *startupRepository) GetStartupByID(id uint) (*model.Startup, error) {
 	var startup model.Startup
+	fmt.Println("Debug...............")
 	err := r.db.Preload("Address").
 		Preload("Products.Users").
 		Preload("RevenueInfo").
