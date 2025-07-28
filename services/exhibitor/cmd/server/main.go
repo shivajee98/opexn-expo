@@ -51,6 +51,7 @@ func main() {
 				"https://www.opexn.com":            true,
 				"https://stall.opexn.com":          true,
 				"https://registration.opexn.com/":  true,
+				"https://registration.opexn.com":  true,
 				"http://localhost:3000":            true,
 				"http://localhost:3001":            true,
 				"http://localhost:3002":            true,
